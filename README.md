@@ -6,6 +6,23 @@ Todo List Application Service. FullStack application
 
 ---
 
+### Up local environment
+
+1. Update .env file with your local environment variables
+
+
+2. Run the following command to start the server
+
+```shell
+go mod tidy
+````
+
+```shell
+go run cmd/main.go
+```
+
+---
+
 ### API requests
 
 Create a User
