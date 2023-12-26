@@ -8,9 +8,13 @@ Todo List Application Service. FullStack application
 
 ### Up local environment
 
+Make sure if you have a `Golang` installed. If not install it - https://go.dev/dl/
+
+```shell
+go version
+```
+
 1. Update .env file with your local environment variables
-
-
 2. Run the following command to start the server
 
 ```shell
