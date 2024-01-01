@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/StarLance-Squad/todo-list-service/graph/badge.svg?token=J0WE99LHAE)](https://codecov.io/gh/StarLance-Squad/todo-list-service)
+
 # todo-list-service
 
 Todo List Application Service. FullStack application
