@@ -90,13 +90,6 @@ func GetAllTodosByUserID(c echo.Context) error {
 
 	offset := (page - 1) * limit
 
-	//// Query the database for todos by the user ID with pagination
-	//var todos []models.Todo
-	//result := db.DB.Preload("User").Where("user_id = ?", userID).Limit(limit).Offset(offset).Find(&todos)
-	//if result.Error != nil {
-	//	return echo.NewHTTPError(http.StatusInternalServerError, result.Error.Error())
-	//}
-
 	// Inside GetAllTodosByUserID function
 	var todos []TodoResponse
 	result := db.DB.Model(&models.Todo{}).Select("id, title, description, completed, user_id, created_at, updated_at").Where("user_id = ?", userID).Limit(limit).Offset(offset).Scan(&todos)

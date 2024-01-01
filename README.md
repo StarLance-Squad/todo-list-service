@@ -3,7 +3,8 @@
 Todo List Application Service. FullStack application
 
 ### Docs: https://echo.labstack.com/docs
->Echo - High performance, extensible, minimalist Go web framework
+
+> Echo - High performance, extensible, minimalist Go web framework
 
 ---
 
@@ -66,4 +67,3 @@ curl -X POST http://localhost:8000/todos/get-all \
      -H 'Content-Type: application/json' \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJuYW1lIjoiIiwiYWRtaW4iOmZhbHNlLCJzdWIiOiJuZXd1c2VyIn0.P8QU9JJt5IpB2DCJ5fyp-lJj3TyYQgS2tD665ztLReA"
 ```
-
