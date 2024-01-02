@@ -1,0 +1,20 @@
+package services
+
+import (
+	"todo-list-service/internal/db"
+	"todo-list-service/internal/models"
+)
+
+type TodoService struct {
+	TodoRepo db.TodoRepository
+}
+
+func (s *TodoService) CreateTodo(todo *models.Todo) (*models.Todo, error) {
+	return s.TodoRepo.CreateTodo(todo)
+}
+
+func (s *TodoService) GetTodosCount() (int64, error) { return s.TodoRepo.GetTodosCount() }
+
+func (s *TodoService) GetAllTodosForUser(userId uint, limit int, offset int) ([]db.TodoResponse, error) {
+	return s.TodoRepo.GetAllTodosForUser(userId, limit, offset)
+}

@@ -14,6 +14,7 @@ import (
 	"todo-list-service/internal/auth"
 	"todo-list-service/internal/db"
 	"todo-list-service/internal/routes"
+	"todo-list-service/internal/services"
 )
 
 func init() {
@@ -26,14 +27,24 @@ func main() {
 	e := setupEcho()
 
 	// Connect to the database with GORM
-	db.ConnectDB() // ConnectDB no longer returns an error
+	dbInstance := db.ConnectDB()
 	defer func() {
-		sqlDB, err := db.DB.DB() // Access the global DB variable
+		sqlDB, err := dbInstance.DB()
 		if err != nil {
 			log.Fatalf("Error on closing database connection: %v", err)
 		}
 		sqlDB.Close()
 	}()
+
+	// Initialize repositories
+	userRepo := &db.GormUserRepository{DB: dbInstance}
+	todoRepo := &db.GormTodoRepository{DB: dbInstance}
+
+	// Initialize services
+	svc := &services.Services{
+		UserService: &services.UserService{UserRepo: userRepo},
+		TodoService: &services.TodoService{TodoRepo: todoRepo},
+	}
 
 	// JWT Middleware Configuration
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -42,8 +53,8 @@ func main() {
 	}
 	jwtMiddleware := middleware.JWTWithConfig(auth.JWTMiddlewareConfig(jwtSecret))
 
-	// Initialize routes with JWT middleware
-	routes.Init(e, jwtMiddleware)
+	// Initialize routes
+	routes.Init(e, svc, jwtMiddleware)
 
 	// Get server port from environment variable, default to 8000
 	port := os.Getenv("DEV_PORT")
