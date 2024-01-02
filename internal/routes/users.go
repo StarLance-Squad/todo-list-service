@@ -1,12 +1,11 @@
 package routes
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
-	"strconv"
 	"strings"
+	middleware "todo-list-service/internal/mdw"
 	"todo-list-service/internal/models"
 	"todo-list-service/internal/services"
 )
@@ -37,50 +36,12 @@ func CreateUserHandler(c echo.Context, userService *services.UserService) error 
 }
 
 func GetUsers(c echo.Context, userService *services.UserService) error {
-	// Get pagination parameters from query, with defaults
-	page, _ := strconv.Atoi(c.QueryParam("page"))
-	if page == 0 {
-		page = 1
-	}
-	limit := 10
-	offset := (page - 1) * limit
+	pagination := c.Get("pagination").(*middleware.PaginationInfo)
 
-	// Get users slice
-	users, err := userService.GetAllUsers(limit, offset)
+	response, err := userService.GetAllUsersWithPagination(pagination, "/users")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// Get total count of users
-	count, err := userService.GetUsersCount()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	// Calculate the total number of pages
-	totalPages := (count + int64(limit) - 1) / int64(limit)
-
-	// Check if requested page is beyond the total pages
-	if int64(page) > totalPages {
-		return echo.NewHTTPError(http.StatusNotFound, "Page not found")
-	}
-
-	// Generate the next link if there are more pages
-	var next string
-	if page < int(totalPages) {
-		next = fmt.Sprintf("/users?page=%d", page+1)
-	}
-
-	// Generate the previous link if it's not the first page
-	var prev string
-	if page > 1 {
-		prev = fmt.Sprintf("/users?page=%d", page-1)
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"users": users,
-		"count": count,
-		"next":  next,
-		"prev":  prev,
-	})
+	return c.JSON(http.StatusOK, response)
 }

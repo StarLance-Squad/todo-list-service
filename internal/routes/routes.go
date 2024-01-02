@@ -10,20 +10,17 @@ func Init(e *echo.Echo, svc *services.Services, jwtMiddleware echo.MiddlewareFun
 	// First touch page
 	e.GET("/", Home)
 
-	// Auth routes
+	// ---------------- Auth routes ---------------- //
 	e.POST("/login", func(c echo.Context) error {
 		return Login(c, svc.UserService)
 	})
+	// ---------------- Auth routes ---------------- //
 
 	// ---------------- User routes ---------------- //
-	e.POST("/users", func(c echo.Context) error {
-		return CreateUserHandler(c, svc.UserService)
-	})
+	e.POST("/users", func(c echo.Context) error { return CreateUserHandler(c, svc.UserService) })
 
 	// todo - provide a user role Admin, and only Admins can access this route
-	e.GET("/users", func(c echo.Context) error {
-		return GetUsers(c, svc.UserService)
-	}, jwtMiddleware)
+	e.GET("/users", func(c echo.Context) error { return GetUsers(c, svc.UserService) }, jwtMiddleware)
 	// ---------------- User routes ---------------- //
 
 	// ---------------- Todos routes --------------- //

@@ -13,6 +13,7 @@ import (
 	"time"
 	"todo-list-service/internal/auth"
 	"todo-list-service/internal/db"
+	mdv "todo-list-service/internal/mdw"
 	"todo-list-service/internal/routes"
 	"todo-list-service/internal/services"
 )
@@ -92,8 +93,9 @@ func setupEcho() *echo.Echo {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(mdv.PaginationMiddleware)
 
-	// CORS middleware
+	// CORS mdw
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
 		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")

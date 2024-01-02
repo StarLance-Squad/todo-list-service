@@ -3,7 +3,9 @@ package services
 import (
 	"golang.org/x/crypto/bcrypt"
 	"todo-list-service/internal/db"
+	middleware "todo-list-service/internal/mdw"
 	"todo-list-service/internal/models"
+	"todo-list-service/internal/utils"
 )
 
 type UserService struct {
@@ -33,8 +35,25 @@ func (s *UserService) UpdateLastLogin(user *models.User) error {
 	return s.UserRepo.UpdateLastLogin(user)
 }
 
-func (s *UserService) GetAllUsers(limit int, offset int) ([]models.User, error) {
-	return s.UserRepo.GetAllUsers(limit, offset)
+func (s *UserService) GetAllUsersWithPagination(pagination *middleware.PaginationInfo, basePath string) (*PaginatedResponse[models.User], error) {
+	totalCount, err := s.UserRepo.GetUsersCount()
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := s.UserRepo.GetAllUsers(pagination.Limit, pagination.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	next, prev := utils.GeneratePaginationLinks(pagination, totalCount, basePath)
+
+	return &PaginatedResponse[models.User]{
+		Data:       users,
+		TotalCount: totalCount,
+		Next:       next,
+		Prev:       prev,
+	}, nil
 }
 
 func (s *UserService) GetUsersCount() (int64, error) { return s.UserRepo.GetUsersCount() }
