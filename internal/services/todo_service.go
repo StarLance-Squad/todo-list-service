@@ -18,3 +18,11 @@ func (s *TodoService) GetTodosCount() (int64, error) { return s.TodoRepo.GetTodo
 func (s *TodoService) GetAllTodosForUser(userId uint, limit int, offset int) ([]db.TodoResponse, error) {
 	return s.TodoRepo.GetAllTodosForUser(userId, limit, offset)
 }
+
+func (s *TodoService) DeleteTodoByIDAndUserID(todoID string, userID uint) error {
+	return s.TodoRepo.DeleteTodoByIDAndUserID(todoID, userID)
+}
+
+func (s *TodoService) UpdateTodoByIDAndUserID(todoID string, userID uint, updatedTodo *models.Todo) error {
+	return s.TodoRepo.UpdateTodoByIDAndUserID(todoID, userID, updatedTodo)
+}

@@ -32,5 +32,11 @@ func Init(e *echo.Echo, svc *services.Services, jwtMiddleware echo.MiddlewareFun
 	e.GET("/todos", func(c echo.Context) error {
 		return GetAllTodosByUserID(c, svc.TodoService)
 	}, jwtMiddleware)
+
+	// Note! Only auth user can access this route and delete his own todos
+	e.DELETE("/todos/:todoID/:userID", func(c echo.Context) error { return DeleteTodoByIDAndUserID(c, svc.TodoService) }, jwtMiddleware)
+
+	// Note! Only auth user can access this route and update his own todos
+	e.PUT("/todos/:todoID/:userID", func(c echo.Context) error { return UpdateTodoByIDAndUserID(c, svc.TodoService) }, jwtMiddleware)
 	// ---------------- Todos routes --------------- //
 }

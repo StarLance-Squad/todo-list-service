@@ -115,3 +115,51 @@ func GetAllTodosByUserID(c echo.Context, todoService *services.TodoService) erro
 		"prev":  prev,
 	})
 }
+
+func DeleteTodoByIDAndUserID(c echo.Context, todoService *services.TodoService) error {
+	// Extracts the todoID and userID from the request parameters
+	todoID := c.Param("todoID")
+	userIDStr := c.Param("userID")
+
+	// Parses the userID string to an unsigned integer
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid userID"})
+	}
+
+	// Calls the TodoService to delete a specific todo belonging to the user
+	err = todoService.DeleteTodoByIDAndUserID(todoID, uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// Returns a success message upon successful deletion
+	return c.JSON(http.StatusOK, map[string]string{"message": "Todo deleted successfully"})
+}
+
+func UpdateTodoByIDAndUserID(c echo.Context, todoService *services.TodoService) error {
+	// Extracts the todoID and userID from the request parameters
+	todoID := c.Param("todoID")
+	userIDStr := c.Param("userID")
+
+	// Parses the userID string to an unsigned integer
+	userID, err := strconv.ParseUint(userIDStr, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid userID"})
+	}
+
+	// Binds the request body to the updatedTodo model
+	var updatedTodo models.Todo
+	if err := c.Bind(&updatedTodo); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Calls the TodoService to update a specific todo belonging to the user
+	err = todoService.UpdateTodoByIDAndUserID(todoID, uint(userID), &updatedTodo)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// Returns a success message upon successful update
+	return c.JSON(http.StatusOK, map[string]string{"message": "Todo updated successfully"})
+}

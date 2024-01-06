@@ -10,6 +10,8 @@ type TodoRepository interface {
 	CreateTodo(todo *models.Todo) (*models.Todo, error)
 	GetAllTodosForUser(userId uint, limit int, offset int) ([]TodoResponse, error)
 	GetTodosCount() (int64, error)
+	DeleteTodoByIDAndUserID(todoID string, userID uint) error
+	UpdateTodoByIDAndUserID(todoID string, userID uint, updatedTodo *models.Todo) error
 }
 
 type GormTodoRepository struct {
@@ -41,4 +43,14 @@ func (r *GormTodoRepository) GetAllTodosForUser(userId uint, limit int, offset i
 	var todos []TodoResponse
 	result := r.DB.Model(&models.Todo{}).Select("id, title, description, completed, user_id, created_at, updated_at").Where("user_id = ?", userId).Limit(limit).Offset(offset).Scan(&todos)
 	return todos, result.Error
+}
+
+func (r *GormTodoRepository) DeleteTodoByIDAndUserID(todoID string, userID uint) error {
+	result := r.DB.Where("id = ? AND user_id = ?", todoID, userID).Delete(&models.Todo{})
+	return result.Error
+}
+
+func (r *GormTodoRepository) UpdateTodoByIDAndUserID(todoID string, userID uint, updatedTodo *models.Todo) error {
+	result := r.DB.Where("id = ? AND user_id = ?", todoID, userID).Updates(updatedTodo)
+	return result.Error
 }
