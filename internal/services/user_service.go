@@ -18,12 +18,20 @@ func (s *UserService) CreateUser(user *models.User) (*models.User, error) {
 
 func (s *UserService) AuthenticateUser(username, password string) (*models.User, error) {
 	user, err := s.UserRepo.GetUserByUsername(username)
+
+	// if any error occurs, we return nil and the error for Invalid credentials message
 	if err != nil {
-		// User not found or other error
+		// User not found or DB error
 		return nil, err
 	}
 
-	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)) != nil {
+	// Check if the user object is nil
+	if user == nil {
+		return nil, err
+	}
+
+	// Correctly capture error from password comparison
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		// Password does not match
 		return nil, err
 	}

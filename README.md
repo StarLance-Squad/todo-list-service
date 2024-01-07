@@ -35,25 +35,55 @@ go run cmd/main.go
 
 ---
 
-### API requests
+### API requests for Unix Shell with cURL
 
-Create a User
-
-```shell
-curl -X POST http://localhost:8000/users \
--H 'Content-Type: application/json' \
--d '{"Username": "newuser", "Email": "newuser@example.com", "Password": "mypassword"}'
-```
-
-User Login
+#### Register a new User
 
 ```shell
-curl -X POST http://localhost:8000/login \
-     -H 'Content-Type: application/x-www-form-urlencoded' \
-     -d 'username=newuser&password=mypassword'
+curl -X POST http://localhost:8000/authentication/register \
+     -H 'Content-Type: application/json' \
+     -d '{
+           "username": "zelenchuk",
+           "email": "zelenchuk@gmail.com",
+           "password": "root_admin"
+         }'
 ```
 
-Create a Todo
+---
+
+#### Login User
+
+```shell
+curl -X POST http://localhost:8000/authentication/login \
+     -H "Content-Type: application/json" \
+     -d '{
+           "username": "newuser",
+           "password": "mypassword"
+         }'
+```
+
+---
+
+#### Who I am
+
+```shell
+curl -X GET -H "Authorization: Bearer [Your_JWT_Token]" http://localhost:8000/authentication/whoiam
+```
+
+JSON response:
+
+```json
+{
+  "admin": false,
+  "exp": 1704704665,
+  "userId": 52,
+  "username": "zelenchuk"
+}
+```
+
+---
+
+#### Create a Todo
 
 ```shell
 curl -X POST http://localhost:8000/todos \
@@ -62,15 +92,17 @@ curl -X POST http://localhost:8000/todos \
      -d '{"Title": "Sample Todo", "Description": "This is a sample todo item", "Completed": false}'
 ```
 
+---
+
 Get all Todos
 
 ```shell
-curl -X POST http://localhost:8000/todos/get-all \
+curl -X GET http://localhost:8000/todos \
      -H 'Content-Type: application/json' \
      -H "Authorization: Bearer [Your_JWT_Token]"
 ```
 
-### Alternative Application Execution Methods
+### Execution Methods for Windows PowerShell
 
 ---
 
@@ -124,7 +156,7 @@ $headers = @{
 Invoke-WebRequest -Uri "http://localhost:8000/todos" -Headers $headers
 ```
 
-####  Deleting a Todo
+#### Deleting a Todo
 
 ```shell
 $headers = @{

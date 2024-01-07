@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"github.com/go-playground/validator"
 	"github.com/joho/godotenv"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
@@ -11,8 +13,8 @@ import (
 	"os/signal"
 	"strings"
 	"time"
-	"todo-list-service/internal/auth"
 	"todo-list-service/internal/db"
+	"todo-list-service/internal/loggerService"
 	mdv "todo-list-service/internal/mdw"
 	"todo-list-service/internal/routes"
 	"todo-list-service/internal/services"
@@ -47,15 +49,8 @@ func main() {
 		TodoService: &services.TodoService{TodoRepo: todoRepo},
 	}
 
-	// JWT Middleware Configuration
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		log.Fatal("JWT_SECRET is not set in .env file")
-	}
-	jwtMiddleware := middleware.JWTWithConfig(auth.JWTMiddlewareConfig(jwtSecret))
-
-	// Initialize routes
-	routes.Init(e, svc, jwtMiddleware)
+	// Initialize app routes
+	routes.Init(e, svc)
 
 	// Get server port from environment variable, default to 8000
 	port := os.Getenv("DEV_PORT")
@@ -67,6 +62,7 @@ func main() {
 	e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
+	e.GET("/", func(c echo.Context) error { return c.NoContent(http.StatusOK) })
 
 	// Start server in a goroutine
 	go func() {
@@ -87,13 +83,51 @@ func main() {
 	}
 }
 
+type (
+	CustomValidator struct {
+		validator *validator.Validate
+	}
+)
+
+// Validate validates the request body. Docs: https://echo.labstack.com/docs/request#validate-data
+func (cv *CustomValidator) Validate(i interface{}) error {
+	if err := cv.validator.Struct(i); err != nil {
+		// Optionally, you could return the error to give each route more control over the status code
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return nil
+}
+
 func setupEcho() *echo.Echo {
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
+	e.HTTPErrorHandler = loggerService.CustomHTTPErrorHandler
 
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(mdv.PaginationMiddleware)
+
+	// Read and decode JWT token here: https://jwt.io/
+	// echo JWT Middleware Configuration. Docs: https://github.com/labstack/echo-jwt
+	jwtSecret := os.Getenv("JWT_SECRET")
+	e.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(jwtSecret),
+		Skipper: func(c echo.Context) bool {
+			// List of endpoints that don't require JWT authentication
+			unprotectedEndpoints := []string{"/health", "/", "/authentication/login", "/authentication/register"}
+
+			// Skip JWT middleware for endpoints in the list
+			for _, endpoint := range unprotectedEndpoints {
+				if c.Path() == endpoint {
+					return true
+				}
+			}
+
+			// Important! All other endpoints require JWT authentication
+			return false
+		},
+	}))
 
 	// CORS mdw
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
@@ -104,8 +138,8 @@ func setupEcho() *echo.Echo {
 	origins := strings.Split(allowedOrigins, ",")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: origins,
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.MIMEMultipartForm},
 	}))
 
 	return e

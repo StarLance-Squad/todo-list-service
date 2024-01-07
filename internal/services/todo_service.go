@@ -13,9 +13,11 @@ func (s *TodoService) CreateTodo(todo *models.Todo) (*models.Todo, error) {
 	return s.TodoRepo.CreateTodo(todo)
 }
 
-func (s *TodoService) GetTodosCount() (int64, error) { return s.TodoRepo.GetTodosCount() }
+func (s *TodoService) GetTodosCount(userId float64) (int64, error) {
+	return s.TodoRepo.GetTodosCount(userId)
+}
 
-func (s *TodoService) GetAllTodosForUser(userId uint, limit int, offset int) ([]db.TodoResponse, error) {
+func (s *TodoService) GetAllTodosForUser(userId float64, limit int, offset int) ([]db.TodoResponse, error) {
 	return s.TodoRepo.GetAllTodosForUser(userId, limit, offset)
 }
 

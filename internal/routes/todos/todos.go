@@ -1,39 +1,47 @@
-package routes
+package todos
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
-	"todo-list-service/internal/auth"
+	"todo-list-service/internal/db"
 	"todo-list-service/internal/models"
 	"todo-list-service/internal/services"
 )
 
+//func CreateTodo(c echo.Context, todoService *services.TodoService) error {
+//
+//	userToken := c.Get("user").(*jwt.Token)
+//	claims := userToken.Claims.(jwt.MapClaims)
+//	userId := claims["userId"].(float64)
+//
+//	var todo models.Todo
+//	if err := c.Bind(&todo); err != nil {
+//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+//	}
+//	todo.UserID = userId
+//
+//	// Save the new TodoItem
+//	newTodoItem, resultError := todoService.CreateTodo(&todo)
+//	if resultError != nil {
+//		return echo.NewHTTPError(http.StatusInternalServerError, resultError.Error())
+//	}
+//
+//	return c.JSON(http.StatusCreated, newTodoItem)
+//}
+
 func CreateTodo(c echo.Context, todoService *services.TodoService) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+	userId := claims["userId"].(float64)
+
 	var todo models.Todo
 	if err := c.Bind(&todo); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	user := c.Get("user")
-	if user == nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
-	}
-
-	token, ok := user.(*jwt.Token)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unexpected token type")
-	}
-
-	// Inside CreateTodo function
-	claims, ok := token.Claims.(*auth.JwtCustomClaims)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "unexpected claims type")
-	}
-
-	todo.UserID = claims.UserID // Make sure this UserID is an integer
+	todo.UserID = userId
 
 	// Save the new TodoItem
 	newTodoItem, resultError := todoService.CreateTodo(&todo)
@@ -41,31 +49,27 @@ func CreateTodo(c echo.Context, todoService *services.TodoService) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, resultError.Error())
 	}
 
-	return c.JSON(http.StatusCreated, newTodoItem)
+	// Convert models.Todo to TodoResponse
+	todoResponse := db.TodoResponse{
+		ID:          newTodoItem.ID,
+		Title:       newTodoItem.Title,
+		Description: newTodoItem.Description,
+		Completed:   newTodoItem.Completed,
+		UserID:      newTodoItem.UserID,
+	}
+
+	return c.JSON(http.StatusCreated, todoResponse)
 }
 
 func GetAllTodosByUserID(c echo.Context, todoService *services.TodoService) error {
-	// Get user from JWT token
-	user := c.Get("user")
-	if user == nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
-	}
 
-	token, ok := user.(*jwt.Token)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unexpected token type")
-	}
-
-	claims, ok := token.Claims.(*auth.JwtCustomClaims)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unexpected claims type")
-	}
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+	userId := claims["userId"].(float64)
 
 	// Print the JWT token data
 	c.Logger().Print("JWT token data: ", claims)
-	c.Logger().Print("User ID from JWT token: ", claims.UserID)
-
-	userId := claims.UserID // Get user ID from JWT token
+	c.Logger().Print("userId: ", userId)
 
 	// Get pagination parameters from query, with defaults
 	page, _ := strconv.Atoi(c.QueryParam("page"))
@@ -82,13 +86,25 @@ func GetAllTodosByUserID(c echo.Context, todoService *services.TodoService) erro
 	}
 
 	// Get the total count of todos for the user
-	count, err := todoService.GetTodosCount()
+	count, err := todoService.GetTodosCount(userId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	c.Logger().Print("count: ", count)
+
+	// Return an empty list if there are no todos. Means no todos for the user
+	if count == 0 {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"todos": []models.Todo{},
+			"count": count,
+			"next":  nil,
+			"prev":  nil,
+		})
 	}
 
 	// Calculate the total number of pages
 	totalPages := (count + int64(limit) - 1) / int64(limit)
+	c.Logger().Print("totalPages: ", totalPages)
 
 	// Check if requested page is beyond the total pages
 	if int64(page) > totalPages {
@@ -107,12 +123,28 @@ func GetAllTodosByUserID(c echo.Context, todoService *services.TodoService) erro
 		prev = fmt.Sprintf("/users?page=%d", page-1)
 	}
 
+	var getNext = func() interface{} {
+		if next != "" {
+			return next
+		} else {
+			return nil
+		}
+	}
+
+	var getPrev = func() interface{} {
+		if prev != "" {
+			return prev
+		} else {
+			return nil
+		}
+	}
+
 	// Return the todos, count, and next link in the response
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"todos": todos,
 		"count": count,
-		"next":  next,
-		"prev":  prev,
+		"next":  getNext(),
+		"prev":  getPrev(),
 	})
 }
 

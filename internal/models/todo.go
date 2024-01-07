@@ -10,7 +10,7 @@ type Todo struct {
 	Title       string
 	Description string
 	Completed   bool
-	UserID      uint // Foreign key for User (integer type)
+	UserID      float64
 	User        User // Associating with the User model
 	gorm.Model
 }
