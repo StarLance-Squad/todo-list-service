@@ -30,7 +30,7 @@ go list -m all
 ```
 
 ```shell
-go run cmd/main.go
+go run ./cmd
 ```
 
 ---
