@@ -11,27 +11,6 @@ import (
 	"todo-list-service/internal/services"
 )
 
-//func CreateTodo(c echo.Context, todoService *services.TodoService) error {
-//
-//	userToken := c.Get("user").(*jwt.Token)
-//	claims := userToken.Claims.(jwt.MapClaims)
-//	userId := claims["userId"].(float64)
-//
-//	var todo models.Todo
-//	if err := c.Bind(&todo); err != nil {
-//		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-//	}
-//	todo.UserID = userId
-//
-//	// Save the new TodoItem
-//	newTodoItem, resultError := todoService.CreateTodo(&todo)
-//	if resultError != nil {
-//		return echo.NewHTTPError(http.StatusInternalServerError, resultError.Error())
-//	}
-//
-//	return c.JSON(http.StatusCreated, newTodoItem)
-//}
-
 func CreateTodo(c echo.Context, todoService *services.TodoService) error {
 	userToken := c.Get("user").(*jwt.Token)
 	claims := userToken.Claims.(jwt.MapClaims)
