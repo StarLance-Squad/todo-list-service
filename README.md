@@ -35,6 +35,20 @@ go run ./cmd
 
 ---
 
+#### Build the application
+
+```shell
+go build -o todo-list-service ./cmd
+```
+
+#### Run the application
+
+```shell
+./todo-list-service
+```
+
+---
+
 ### API requests for Unix Shell with cURL
 
 #### Register a new User
