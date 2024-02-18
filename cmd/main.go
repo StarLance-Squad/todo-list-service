@@ -48,7 +48,7 @@ func main() {
 	routes.Init(e, svc)
 
 	// Get server port from environment variable, default to 8000
-	port := os.Getenv("DEV_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
 	}
