@@ -197,3 +197,76 @@ $body = @{
 
 Invoke-WebRequest -Uri "http://localhost:8000/todos/<todo_id>/<user_id>" -Method Put -Headers $headers -Body $body
 ```
+
+---
+
+# Production API
+
+---
+
+#### Register User
+
+```shell
+curl -X POST https://desolate-anchorage-72827-298f3197b035.herokuapp.com/authentication/register \
+     -H 'Content-Type: application/json' \
+     -d '{
+           "username": "zelenchuk",
+           "email": "zelenchuk@gmail.com",
+           "password": "root_admin"
+         }'
+```
+
+---
+
+#### Login User
+
+```shell
+curl -X POST https://desolate-anchorage-72827-298f3197b035.herokuapp.com/authentication/login \
+     -H "Content-Type: application/json" \
+     -d '{
+           "username": "newuser",
+           "password": "mypassword"
+         }'
+```
+
+---
+
+#### Who I am
+
+```shell
+curl -X GET -H "Authorization: Bearer [Your_JWT_Token]" https://desolate-anchorage-72827-298f3197b035.herokuapp.com/authentication/whoiam
+```
+
+JSON response:
+
+```json
+{
+  "admin": false,
+  "exp": 1704704665,
+  "userId": 52,
+  "username": "zelenchuk"
+}
+```
+
+---
+
+#### Create a Todo
+
+```shell
+curl -X POST https://desolate-anchorage-72827-298f3197b035.herokuapp.com/todos \
+     -H 'Content-Type: application/json' \
+     -H 'Authorization: Bearer [Your_JWT_Token]' \
+     -d '{"Title": "Sample Todo", "Description": "This is a sample todo item", "Completed": false}'
+```
+
+---
+
+#### Get all Todos
+
+```shell
+curl -X GET https://desolate-anchorage-72827-298f3197b035.herokuapp.com/todos \
+     -H 'Content-Type: application/json' \
+     -H "Authorization: Bearer [Your_JWT_Token]"
+```
+
+---
