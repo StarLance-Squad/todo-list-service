@@ -81,6 +81,7 @@ func setupEcho() *echo.Echo {
 		AllowHeaders: []string{
 			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
 			echo.HeaderAuthorization, "X-Requested-With",
+			echo.MIMEMultipartForm,
 		},
 	}))
 
