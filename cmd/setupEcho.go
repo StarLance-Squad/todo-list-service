@@ -83,6 +83,7 @@ func setupEcho() *echo.Echo {
 			echo.HeaderAuthorization, "X-Requested-With",
 			//echo.MIMEMultipartForm, // frontend is not working with this rule
 		},
+		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
 	}))
 
 	return e
