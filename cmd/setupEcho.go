@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"todo-list-service/internal/loggerService"
 	mdv "todo-list-service/internal/mdw"
 )
@@ -73,30 +74,16 @@ func setupEcho() *echo.Echo {
 		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
 	}
 
-	// origins := strings.Split(allowedOrigins, ",")
-	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	//	AllowOrigins: origins,
-	//	AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-	//	AllowHeaders: []string{
-	//		echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
-	//		echo.HeaderAuthorization, "X-Requested-With",
-	//		//echo.MIMEMultipartForm, // frontend is not working with this rule
-	//	},
-	//	AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
-	//}))
-
-	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	//	AllowOrigins:     []string{"http://localhost:3000"},
-	//	AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-	//	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-	//	AllowCredentials: true,
-	//}))
-
+	origins := strings.Split(allowedOrigins, ",")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"}, // Temporarily for testing
-		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-		AllowHeaders:     []string{"Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"},
-		AllowCredentials: true,
+		AllowOrigins: origins,
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+		AllowHeaders: []string{
+			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
+			echo.HeaderAuthorization, "X-Requested-With",
+			//echo.MIMEMultipartForm, // frontend is not working with this rule
+		},
+		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
 	}))
 
 	return e
