@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"todo-list-service/internal/loggerService"
 	mdv "todo-list-service/internal/mdw"
 )
@@ -74,7 +73,7 @@ func setupEcho() *echo.Echo {
 		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
 	}
 
-	origins := strings.Split(allowedOrigins, ",")
+	// origins := strings.Split(allowedOrigins, ",")
 	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 	//	AllowOrigins: origins,
 	//	AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
@@ -87,10 +86,10 @@ func setupEcho() *echo.Echo {
 	//}))
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     origins,
+		AllowOrigins:     []string{"*"}, // Temporarily allow all origins
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-Requested-With"},
-		AllowCredentials: true, // Accept credentials from cross-origin requests
+		AllowCredentials: true,
 	}))
 
 	return e
