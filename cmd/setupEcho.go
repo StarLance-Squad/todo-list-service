@@ -85,10 +85,17 @@ func setupEcho() *echo.Echo {
 	//	AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
 	//}))
 
+	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	//	AllowOrigins:     []string{"http://localhost:3000"},
+	//	AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+	//	AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	//	AllowCredentials: true,
+	//}))
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"*"}, // Temporarily for testing
 		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowHeaders:     []string{"Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"},
 		AllowCredentials: true,
 	}))
 
