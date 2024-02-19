@@ -42,6 +42,24 @@ func setupEcho() *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(mdv.PaginationMiddleware)
 
+	// CORS mdw
+	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
+	}
+
+	origins := strings.Split(allowedOrigins, ",")
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: origins,
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+		AllowHeaders: []string{
+			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
+			echo.HeaderAuthorization, "X-Requested-With",
+			//echo.MIMEMultipartForm, // frontend is not working with this rule
+		},
+		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
+	}))
+
 	// Read and decode JWT token here: https://jwt.io/
 	// echo JWT Middleware Configuration. Docs: https://github.com/labstack/echo-jwt
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -66,24 +84,6 @@ func setupEcho() *echo.Echo {
 			// Important! All other endpoints require JWT authentication
 			return false
 		},
-	}))
-
-	// CORS mdw
-	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if allowedOrigins == "" {
-		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
-	}
-
-	origins := strings.Split(allowedOrigins, ",")
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: origins,
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-		AllowHeaders: []string{
-			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
-			echo.HeaderAuthorization, "X-Requested-With",
-			//echo.MIMEMultipartForm, // frontend is not working with this rule
-		},
-		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
 	}))
 
 	return e
