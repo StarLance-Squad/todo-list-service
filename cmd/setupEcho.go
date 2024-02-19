@@ -85,19 +85,5 @@ func setupEcho() *echo.Echo {
 		},
 	}))
 
-	// // fixed
-	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	//	AllowOrigins: origins,
-	//	AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-	//	AllowHeaders: []string{
-	//		echo.HeaderOrigin,
-	//		echo.HeaderContentType,
-	//		echo.HeaderAccept,
-	//		echo.HeaderAuthorization,
-	//		"X-Requested-With",
-	//		echo.MIMEMultipartForm,
-	//	},
-	//}))
-
 	return e
 }
