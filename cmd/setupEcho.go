@@ -42,7 +42,8 @@ func setupEcho() *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(mdv.PaginationMiddleware)
 
-	// CORS mdw
+	// --------------------------------------CORS----------------------------------------------- //
+	// CORS mdw. CORS must be connected and configured before the JWT Middleware
 	allowedOrigins := os.Getenv("CORS_ALLOWED_ORIGINS")
 	if allowedOrigins == "" {
 		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
@@ -59,7 +60,9 @@ func setupEcho() *echo.Echo {
 		},
 		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
 	}))
+	// --------------------------------------CORS----------------------------------------------- //
 
+	// ---------------------------------------JWT----------------------------------------------- //
 	// Read and decode JWT token here: https://jwt.io/
 	// echo JWT Middleware Configuration. Docs: https://github.com/labstack/echo-jwt
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -85,6 +88,7 @@ func setupEcho() *echo.Echo {
 			return false
 		},
 	}))
+	// ---------------------------------------JWT----------------------------------------------- //
 
 	return e
 }
