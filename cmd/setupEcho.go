@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"todo-list-service/internal/loggerService"
 	mdv "todo-list-service/internal/mdw"
 )
@@ -73,17 +74,23 @@ func setupEcho() *echo.Echo {
 		log.Fatal("CORS_ALLOWED_ORIGINS is not set in .env file")
 	}
 
-	//origins := strings.Split(allowedOrigins, ",")
+	origins := strings.Split(allowedOrigins, ",")
+	//e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	//	AllowOrigins: origins,
+	//	AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+	//	AllowHeaders: []string{
+	//		echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
+	//		echo.HeaderAuthorization, "X-Requested-With",
+	//		//echo.MIMEMultipartForm, // frontend is not working with this rule
+	//	},
+	//	AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
+	//}))
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		//AllowOrigins: origins,
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
-		AllowHeaders: []string{
-			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
-			echo.HeaderAuthorization, "X-Requested-With",
-			//echo.MIMEMultipartForm, // frontend is not working with this rule
-		},
-		AllowCredentials: true, // Set to true if your frontend sends credentials like cookies or auth headers
+		AllowOrigins:     origins,
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodPatch},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, "X-Requested-With"},
+		AllowCredentials: true, // Accept credentials from cross-origin requests
 	}))
 
 	return e
