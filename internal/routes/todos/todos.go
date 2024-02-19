@@ -14,12 +14,21 @@ import (
 func CreateTodo(c echo.Context, todoService *services.TodoService) error {
 	userToken := c.Get("user").(*jwt.Token)
 	claims := userToken.Claims.(jwt.MapClaims)
-	userId := claims["userId"].(float64)
+	userId, ok := claims["userId"].(float64)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid user ID in token")
+	}
 
 	var todo models.Todo
 	if err := c.Bind(&todo); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	// Validate the todo data (you might want to add more validation)
+	if todo.Title == "" || todo.Description == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Title and description are required")
+	}
+
 	todo.UserID = userId
 
 	// Save the new TodoItem
